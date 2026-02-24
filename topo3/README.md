@@ -26,20 +26,20 @@ graph LR
     %% r1 ethernet2 <-> r2 ethernet1
     r1 -- "eth2 ↔ eth1" --- r2
 
+    %% r1 ethernet3 <-> r4 ethernet1
+    r1 -- "eth3 ↔ eth1" --- r4
+
     %% r2 ethernet2 <-> r3 ethernet1
     r2 -- "eth2 ↔ eth1" --- r3
+
+    %% r2 ethernet3 <-> h3 ethernet1
+    r2 -- "eth3 ↔ eth1" --- h3
 
     %% r3 ethernet2 <-> h2 ethernet1
     r3 -- "eth2 ↔ eth1" --- h2
 
-    %% h3 ethernet1 <-> r2 ethernet3
-    h3 -- "eth1 ↔ eth3" --- r2
-
-    %% r3 ethernet3 <-> r4 ethernet2
-    r3 -- "eth3 ↔ eth2" --- r4
-
-    %% r4 ethernet1 <-> r1 ethernet3
-    r4 -- "eth1 ↔ eth3" --- r1
+    %% r4 ethernet2 <-> r3 ethernet3
+    r4 -- "eth2 ↔ eth3" --- r3    
 
     %% Estilização visual (opcional)
     style r1 fill:#ff9,stroke:#333,stroke-width:2px
