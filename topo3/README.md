@@ -45,6 +45,7 @@ graph LR
     style r1 fill:#ff9,stroke:#333,stroke-width:2px
     style r2 fill:#ff9,stroke:#333,stroke-width:2px
     style r3 fill:#ff9,stroke:#333,stroke-width:2px
+    style r4 fill:#ff9,stroke:#333,stroke-width:2px
     style h1 fill:#dff,stroke:#333
     style h2 fill:#dff,stroke:#333
     style h3 fill:#dff,stroke:#333
