@@ -28,11 +28,6 @@ As conexões Telnet são direcionadas para a interface VRF de cada dispositivo d
 - Roteadores: Porta `1000X`, onde `X` é o número do roteador. Exemplo: `r1` é porta `10001`, `r9` é porta `10009`.
 - Hosts: Porta `2000Y`, onde `Y` é o número do host. Exemplo: `h1` é porta `20001`.
 
-### Links P2P (UDP)
-Cada conexão na topologia ocorre entre duas portas UDP locais e remotas formadas usando a lógica `260RN` com 5 dígitos, sendo R o número do nó, e N o número da interface do nó envolvido. Exemplo: A interface `eth2` do `r3` (rj) escuta na porta `26032`.
-
-Para hosts, a lógica da porta emula um nó "0", no formato `2600H`, onde H é o id do host.
-
 ## Diagrama da Topologia (Mermaid)
 
 O diagrama abaixo ilustra as conexões físicas exatas entre as portas dos dispositivos.
