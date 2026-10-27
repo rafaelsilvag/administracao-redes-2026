@@ -7,19 +7,45 @@ vrf definition v1
  exit
 !
 interface ethernet1
- vrf for v1
+ vrf forwarding v1
+ ipv4 address 192.168.1.254 255.255.255.0
+ no shutdown
  no log-link-change
  exit
 !
 interface ethernet2
- vrf for v1
+ vrf forwarding v1
+ ipv4 address 10.1.2.1 255.255.255.0
+ no shutdown
  no log-link-change
  exit
 !
 interface ethernet3
- vrf for v1
+ vrf forwarding v1
+ ipv4 address 10.1.4.1 255.255.255.0
+ no shutdown
  no log-link-change
  exit
+!
+console0
+ no exec authorization
+ no login authentication
+ exit
+!
+!
+ipv4 route v1 192.168.2.0 255.255.255.0 10.1.2.2
+ipv4 route v1 192.168.3.0 255.255.255.0 10.1.2.2
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
 !
 server telnet tester
  security protocol telnet

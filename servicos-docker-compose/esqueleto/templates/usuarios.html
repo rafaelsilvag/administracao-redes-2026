@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cadastro de usuários</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 900px; margin: 2rem auto; padding: 1rem; }
+        label { display: block; margin: 1rem 0; }
+        input, button { padding: .5rem; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th, td { text-align: left; padding: .7rem; border-bottom: 1px solid #ccc; overflow-wrap: anywhere; }
+        td form { display: inline; }
+        .mensagem { color: #a02020; }
+    </style>
+</head>
+<body>
+    <h1>Cadastro de usuários</h1>
+    {% if mensagem %}<p class="mensagem" role="alert">{{ mensagem }}</p>{% endif %}
+
+    <h2>{{ 'Visualizar / editar usuário' if usuario else 'Novo usuário' }}</h2>
+    {% if usuario %}<p>Identificador: {{ usuario.id }}</p>{% endif %}
+    <form method="post" action="{{ '/usuarios/' ~ usuario.id ~ '/editar' if usuario else '/usuarios' }}">
+        <label>Nome:
+            <input name="nome" value="{{ usuario.nome if usuario else '' }}" required minlength="2" maxlength="100">
+        </label>
+        <label>E-mail:
+            <input name="email" type="email" value="{{ usuario.email if usuario else '' }}" required maxlength="254">
+        </label>
+        <button type="submit">{{ 'Salvar alterações' if usuario else 'Cadastrar' }}</button>
+        <a href="/">Novo cadastro / cancelar</a>
+    </form>
+
+    <h2>Usuários cadastrados</h2>
+    <table>
+        <thead><tr><th>ID</th><th>Nome</th><th>E-mail</th><th>Ações</th></tr></thead>
+        <tbody>
+        {% for item in usuarios %}
+            <tr>
+                <td>{{ item.id }}</td><td>{{ item.nome }}</td><td>{{ item.email }}</td>
+                <td>
+                    <a href="/usuarios/{{ item.id }}">Visualizar / editar</a>
+                    <form method="post" action="/usuarios/{{ item.id }}/excluir" onsubmit="return confirm('Excluir este usuário?')">
+                        <button type="submit">Excluir</button>
+                    </form>
+                </td>
+            </tr>
+        {% else %}
+            <tr><td colspan="4">Nenhum usuário cadastrado.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

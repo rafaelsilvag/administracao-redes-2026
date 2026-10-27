@@ -1,0 +1,485 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazilian]{babel}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{multirow}
+\usepackage{listingsutf8}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{booktabs}
+\usepackage{tcolorbox}
+\usepackage{hyperref}
+
+\tcbuselibrary{skins,breakable}
+
+\geometry{
+  top=2.0cm,
+  bottom=2.0cm,
+  left=2.5cm,
+  right=2.0cm
+}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.4em}
+\setlength{\headheight}{14.5pt}
+\renewcommand{\arraystretch}{1.35}
+\setlist[itemize]{itemsep=0.1em, topsep=0.2em, parsep=0pt, partopsep=0pt}
+\setlist[enumerate]{itemsep=0.15em, topsep=0.2em, parsep=0pt, partopsep=0pt}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{Administração de Redes -- 2026}
+\rhead{Domínios Virtuais com NGINX e DNS}
+\cfoot{Página \thepage\ de \pageref{LastPage}}
+
+% ── Cores ─────────────────────────────────────────────────────────────────────
+\definecolor{codebg}{RGB}{248,248,248}
+\definecolor{codeframe}{RGB}{210,210,210}
+\definecolor{myblue}{RGB}{0,60,130}
+\definecolor{mygreen}{RGB}{30,130,30}
+\definecolor{mygray}{RGB}{120,120,120}
+\definecolor{mymauve}{RGB}{140,0,140}
+\definecolor{infobg}{RGB}{230,242,255}
+\definecolor{alertbg}{RGB}{255,248,220}
+\definecolor{successbg}{RGB}{230,255,230}
+
+% ── Estilos de código ──────────────────────────────────────────────────────────
+\lstdefinestyle{bash}{
+  backgroundcolor=\color{codebg},
+  frame=single,
+  rulecolor=\color{codeframe},
+  basicstyle=\ttfamily\footnotesize,
+  breaklines=true,
+  columns=flexible,
+  keepspaces=true,
+  showstringspaces=false,
+  morecomment=[l]{\#},
+  commentstyle=\color{mygray}\itshape,
+  stringstyle=\color{mymauve},
+  xleftmargin=4pt,
+  xrightmargin=4pt,
+  aboveskip=4pt,
+  belowskip=4pt,
+}
+
+\lstdefinestyle{conf}{
+  backgroundcolor=\color{codebg},
+  frame=single,
+  rulecolor=\color{codeframe},
+  basicstyle=\ttfamily\footnotesize,
+  breaklines=true,
+  columns=flexible,
+  keepspaces=true,
+  showstringspaces=false,
+  morecomment=[l]{\#},
+  morecomment=[l]{;},
+  commentstyle=\color{mygray}\itshape,
+  xleftmargin=4pt,
+  xrightmargin=4pt,
+  aboveskip=4pt,
+  belowskip=4pt,
+}
+
+\lstdefinestyle{html}{
+  backgroundcolor=\color{codebg},
+  frame=single,
+  rulecolor=\color{codeframe},
+  basicstyle=\ttfamily\footnotesize,
+  breaklines=true,
+  columns=flexible,
+  keepspaces=true,
+  showstringspaces=false,
+  morestring=[b]{"},
+  stringstyle=\color{mymauve},
+  morecomment=[s]{<!--}{-->},
+  commentstyle=\color{mygray}\itshape,
+  morekeywords={DOCTYPE,html,head,body,meta,title,h1,h2,p,strong,em,lang,charset,style},
+  keywordstyle=\color{myblue},
+  xleftmargin=4pt,
+  xrightmargin=4pt,
+  aboveskip=4pt,
+  belowskip=4pt,
+}
+
+% ── Caixas coloridas ───────────────────────────────────────────────────────────
+\newtcolorbox{infobox}{
+  colback=infobg, colframe=myblue!50, boxrule=0.5pt,
+  arc=3pt, left=6pt, right=6pt, top=4pt, bottom=4pt,
+  breakable
+}
+\newtcolorbox{alertbox}{
+  colback=alertbg, colframe=orange!70, boxrule=0.5pt,
+  arc=3pt, left=6pt, right=6pt, top=4pt, bottom=4pt,
+  breakable
+}
+\newtcolorbox{successbox}{
+  colback=successbg, colframe=mygreen!60, boxrule=0.5pt,
+  arc=3pt, left=6pt, right=6pt, top=4pt, bottom=4pt,
+  breakable
+}
+
+% ── Seções ─────────────────────────────────────────────────────────────────────
+\titleformat{\section}
+  {\normalfont\large\bfseries\color{myblue}}
+  {\thesection.}{0.5em}{}[\vspace{-0.3em}\color{myblue!40}\rule{\linewidth}{0.5pt}]
+
+\titleformat{\subsection}
+  {\normalfont\normalsize\bfseries}
+  {\thesubsection}{0.5em}{}
+
+\titlespacing*{\section}{0pt}{1.0em}{0.5em}
+\titlespacing*{\subsection}{0pt}{0.7em}{0.3em}
+
+% ─────────────────────────────────────────────────────────────────────────────
+\begin{document}
+
+% ── Cabeçalho institucional ────────────────────────────────────────────────────
+\begin{tabular}{|>{\centering\arraybackslash}m{3.2cm}|>{\centering\arraybackslash}m{12.0cm}|}
+  \hline
+  \includegraphics[height=2.5cm]{logo.png}
+  &
+  \begin{minipage}[c]{12.0cm}
+    \centering
+    {\large \textbf{Curso de Sistemas de Informação}}\\[0.15em]
+    {\large \textbf{Disciplina: Administração de Redes}}\\[0.15em]
+    {\large \textbf{Atividade Prática -- Domínios Virtuais com NGINX e DNS}}
+  \end{minipage}
+  \\
+  \hline
+\end{tabular}
+
+\vspace{0.6em}
+
+\begin{center}
+  \begin{tabular}{|>{\bfseries\arraybackslash}m{3.5cm}|>{\arraybackslash}m{10.2cm}|}
+    \hline
+    Professor      & Rafael Silva Guimarães \\
+    \hline
+    Prazo de entrega & 09 de junho de 2026 \\
+    \hline
+    Valor          & 10,0 pontos \\
+    \hline
+    Modalidade     & Trabalho em dupla \\
+    \hline
+  \end{tabular}
+\end{center}
+
+\vspace{0.3em}
+
+% ── Descrição ──────────────────────────────────────────────────────────────────
+\begin{tcolorbox}[colback=myblue!5, colframe=myblue, boxrule=0.7pt, arc=3pt,
+  title={\textbf{Descrição da Atividade}}, fonttitle=\bfseries\color{white},
+  colbacktitle=myblue]
+
+O trabalho consiste em publicar \textbf{seis sites estáticos} no NGINX com \textbf{domínios virtuais}, onde a resolução de nomes é feita pelo servidor DNS \textbf{BIND (named)}, configurado via \textbf{Webmin}.
+
+Cada dupla usa os primeiros nomes dos integrantes para compor os domínios:
+
+\vspace{0.3em}
+\begin{itemize}
+  \item \textbf{Domínios:} \texttt{nome1oaluno.info} \ e \ \texttt{nome2oaluno.info}
+  \item \textbf{Hosts} (repetidos em cada domínio): \texttt{marataizes}, \texttt{castelo}, \texttt{cachoeiro}
+\end{itemize}
+
+\vspace{0.3em}
+\begin{center}
+\begin{tabular}{|l|l|}
+  \hline
+  \textbf{Domínio 1} & \textbf{Domínio 2} \\
+  \hline
+  \texttt{marataizes.nome1oaluno.info} & \texttt{marataizes.nome2oaluno.info} \\
+  \texttt{castelo.nome1oaluno.info}    & \texttt{castelo.nome2oaluno.info} \\
+  \texttt{cachoeiro.nome1oaluno.info}  & \texttt{cachoeiro.nome2oaluno.info} \\
+  \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.3em}
+Cada um dos seis endereços deve exibir uma \textbf{página HTML própria e distinta}. A entrega é um \textbf{tutorial em PDF} demonstrando as configurações realizadas e os testes de acesso.
+\end{tcolorbox}
+
+\vspace{0.3em}
+
+\begin{infobox}
+  \textbf{Exemplo utilizado neste tutorial:} \ \texttt{joao.info} (aluno 1) e \texttt{maria.info} (aluno 2), com servidor DNS/Web no IP \texttt{<IP\_VM>}. Substitua pelos nomes reais e pelo IP do ambiente de laboratório.
+\end{infobox}
+
+% ── Seção 1 ───────────────────────────────────────────────────────────────────
+\section{Ambiente de Configuração}
+
+O ambiente de laboratório utiliza dois equipamentos na mesma rede:
+
+\begin{center}
+  \begin{tabular}{|l|l|c|}
+    \hline
+    \textbf{Máquina} & \textbf{Função} & \textbf{IP (exemplo)} \\
+    \hline
+    \texttt{servidor} & DNS (BIND9) + Web (NGINX) + Webmin & \texttt{<IP\_HTTP>} \\
+    \texttt{cliente}  & Testes de resolução e acesso HTTP   & \texttt{IP\_CLIENTE} \\
+    \hline
+  \end{tabular}
+\end{center}
+
+O Webmin deve estar previamente instalado e acessível em \texttt{https://<IP\_VM>:10000}.
+
+% ── Seção 2 ───────────────────────────────────────────────────────────────────
+\section{Configuração do DNS (BIND9) via Webmin}
+
+\subsection{Criando a zona do primeiro domínio}
+
+\begin{enumerate}
+  \item Acesse o Webmin: \texttt{https://<IP\_VM>:10000}
+  \item No menu lateral: \textbf{Servers} $\rightarrow$ \textbf{BIND DNS Server}.
+  \item Clique em \textbf{Create Master Zone} e preencha:
+  \begin{itemize}
+    \item \textbf{Domain name/Network:} \texttt{joao.info}
+    \item \textbf{Email address:} \texttt{admin@joao.info}
+    \item \textbf{IP address for zone:} \texttt{ENDERECO\_DNS}
+  \end{itemize}
+  \item Clique em \textbf{Create}.
+\end{enumerate}
+
+\subsection{Adicionando os registros A}
+
+Dentro da zona \texttt{joao.info}, clique em \textbf{Address} e adicione três registros:
+
+\begin{center}
+  \begin{tabular}{|l|l|}
+    \hline
+    \textbf{Name}      & \textbf{Address} \\
+    \hline
+    \texttt{marataizes} & \texttt{<IP\_VM>} \\
+    \texttt{castelo}    & \texttt{<IP\_VM>} \\
+    \texttt{cachoeiro}  & \texttt{<IP\_VM>} \\
+    \hline
+  \end{tabular}
+\end{center}
+
+Para cada registro, clique em \textbf{Create}. Ao terminar, clique em \textbf{Apply Configuration}.
+
+\subsection{Criando a zona do segundo domínio}
+
+Repita os passos das seções 2.1 e 2.2 para o segundo domínio (\texttt{maria.info}),
+adicionando os mesmos três registros A apontando para \texttt{<IP\_VM>}.
+
+\subsection{Verificando os arquivos de zona gerados}
+
+% ── Seção 3 ───────────────────────────────────────────────────────────────────
+\section{Criação das Páginas HTML}
+
+\subsection{Criando a estrutura de diretórios}
+
+\begin{lstlisting}[style=bash]
+# Exemplo do diretorio de um site.
+mkdir -p /var/www/marataizes.joao.info
+\end{lstlisting}
+
+\subsection{Criando as páginas HTML (conteúdo distinto para cada site)}
+
+Cada página deve identificar claramente o host e o domínio ao qual pertence.
+Exemplo para \texttt{marataizes.joao.info}:
+
+\begin{lstlisting}[style=html]
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Marataizes - joao.info</title>
+  <style>body { font-family: sans-serif; text-align: center; margin-top: 60px; }</style>
+</head>
+<body>
+  <h1>Marataizes</h1>
+  <p>Dominio: <strong>joao.info</strong></p>
+  <p>Cidade do sul do Espirito Santo, conhecida pela producao de abacaxi.</p>
+</body>
+</html>
+\end{lstlisting}
+
+Crie os seis arquivos com conteúdo diferente:
+
+\begin{lstlisting}[style=bash]
+vim /var/www/marataizes.joao.info/index.html
+vim /var/www/castelo.joao.info/index.html
+vim /var/www/cachoeiro.joao.info/index.html
+vim /var/www/marataizes.maria.info/index.html
+vim /var/www/castelo.maria.info/index.html
+vim /var/www/cachoeiro.maria.info/index.html
+\end{lstlisting}
+
+\begin{alertbox}
+  \textbf{Atenção:} Cada página deve ter um texto diferente das demais. Usar o mesmo conteúdo em páginas distintas implica perda de pontuação no critério de páginas HTML.
+\end{alertbox}
+
+% ── Seção 4 ───────────────────────────────────────────────────────────────────
+\section{Configuração dos Virtual Hosts no NGINX}
+
+\subsection{Criando os arquivos de configuração}
+
+Crie um arquivo em \texttt{/etc/nginx/sites-available/} para cada site.
+Modelo para \texttt{marataizes.joao.info}:
+
+\begin{lstlisting}[style=conf]
+# /etc/nginx/sites-available/marataizes.joao.info
+server {
+    listen 80;
+    server_name marataizes.joao.info;
+
+    root /var/www/marataizes.joao.info;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+}
+\end{lstlisting}
+
+Repita para os outros cinco sites, alterando \texttt{server\_name} e \texttt{root}:
+
+\begin{lstlisting}[style=bash]
+vim /etc/nginx/sites-available/castelo.joao.info
+vim /etc/nginx/sites-available/cachoeiro.joao.info
+vim /etc/nginx/sites-available/marataizes.maria.info
+vim /etc/nginx/sites-available/castelo.maria.info
+vim /etc/nginx/sites-available/cachoeiro.maria.info
+\end{lstlisting}
+
+\subsection{Ativando os sites}
+
+Crie os links simbólicos para habilitar cada site:
+
+\begin{lstlisting}[style=bash]
+    ln -s /etc/nginx/sites-available/marataizes.maria.info \
+          /etc/nginx/sites-enabled/marataizes.maria.info
+\end{lstlisting}
+
+\subsection{Testando a configuração e recarregando o NGINX}
+
+\begin{lstlisting}[style=bash]
+nginx -t
+systemctl reload nginx
+systemctl status nginx
+\end{lstlisting}
+
+\begin{successbox}
+  A saída de \texttt{nginx -t} deve informar \texttt{syntax is ok} e \texttt{test is successful}. Qualquer erro indica problema em um dos arquivos de configuração.
+\end{successbox}
+
+% ── Seção 5 ───────────────────────────────────────────────────────────────────
+\section{Testes e Verificação}
+
+\subsection{Configurando o DNS no cliente}
+
+Na máquina cliente, configure o servidor DNS para apontar para \texttt{<IP\_VM>}.
+No Debian/Ubuntu, edite o arquivo de resolução:
+
+\begin{lstlisting}[style=bash]
+# Edite /etc/resolv.conf
+vim /etc/resolv.conf
+
+# Adicione (ou substitua a linha nameserver existente):
+nameserver <IP\_DNS>
+\end{lstlisting}
+
+\begin{infobox}
+  Em ambientes com NetworkManager, a configuração do DNS deve ser feita pela interface gráfica de rede ou pelo comando \texttt{nmcli con mod <conexão> ipv4.dns <IP\_VM>}.
+\end{infobox}
+
+\subsection{Testes de resolução DNS}
+
+Execute no cliente os comandos abaixo e registre as saídas no tutorial:
+
+\begin{lstlisting}[style=bash]
+# Verificar resolucao dos seis nomes
+dig marataizes.joao.info
+dig castelo.joao.info
+dig cachoeiro.joao.info
+dig marataizes.maria.info
+dig castelo.maria.info
+dig cachoeiro.maria.info
+\end{lstlisting}
+
+A seção \texttt{ANSWER SECTION} de cada resultado deve mostrar o IP \texttt{<IP\_VM>}.
+Exemplo de saída esperada:
+
+\begin{lstlisting}[style=conf]
+;; ANSWER SECTION:
+marataizes.joao.info.  38400  IN  A  <IP\_VM>
+\end{lstlisting}
+
+\subsection{Testes de acesso HTTP}
+
+\begin{lstlisting}[style=bash]
+Utilize no navegador: http://marataizes.joao.info
+\end{lstlisting}
+
+O conteúdo HTML de cada site deve ser exibido no terminal. Acesse também pelo \textbf{navegador} do cliente para confirmar visualmente que cada URL exibe uma página diferente.
+
+% ── Seção 6 ───────────────────────────────────────────────────────────────────
+\section{O que o Tutorial (PDF) deve conter}
+
+O documento a ser entregue deve apresentar as seguintes evidências:
+
+\begin{enumerate}
+  \item \textbf{Identificação:} nomes dos integrantes da dupla e os domínios utilizados.
+  \item \textbf{Configuração do DNS via Webmin:}
+    \begin{itemize}
+      \item Capturas de tela das zonas criadas no BIND DNS Server.
+      \item Capturas de tela dos registros A de cada zona.
+      \item Conteúdo dos arquivos \texttt{/etc/bind/db.nome1.info} e \texttt{/etc/bind/db.nome2.info}.
+      \item Saída de \texttt{systemctl status bind9} mostrando o serviço ativo.
+    \end{itemize}
+  \item \textbf{Configuração do NGINX:}
+    \begin{itemize}
+      \item Conteúdo dos seis arquivos de virtual host em \texttt{sites-available/}.
+      \item Saída do comando \texttt{nginx -t} e \texttt{systemctl status nginx}.
+    \end{itemize}
+  \item \textbf{Páginas HTML:} conteúdo de cada um dos seis arquivos \texttt{index.html}.
+  \item \textbf{Testes:}
+    \begin{itemize}
+      \item Saída do \texttt{dig} para os seis nomes de domínio.
+      \item Saída do \texttt{curl} \textbf{ou} capturas de tela do navegador exibindo os seis sites com conteúdos distintos.
+    \end{itemize}
+\end{enumerate}
+
+% ── Critérios de avaliação ─────────────────────────────────────────────────────
+\vspace{0.5em}
+\begin{center}
+  \Large\textbf{Critérios de Avaliação}
+\end{center}
+
+\begin{center}
+  \begin{tabular}{|p{10.5cm}|c|}
+    \hline
+    \textbf{Critério} & \textbf{Pontuação} \\
+    \hline
+    Zonas DNS criadas corretamente no BIND via Webmin (2 zonas) & 2,0 \\
+    \hline
+    Registros A configurados para os 6 hosts (3 por domínio) & 2,0 \\
+    \hline
+    Virtual hosts do NGINX configurados corretamente para os 6 sites & 2,0 \\
+    \hline
+    Páginas HTML com conteúdo distinto e identificável para cada site & 2,0 \\
+    \hline
+    Testes de resolução DNS documentados (\texttt{dig}/\texttt{nslookup}) & 1,0 \\
+    \hline
+    Testes de acesso HTTP documentados (\texttt{curl}/navegador) & 1,0 \\
+    \hline
+    \textbf{Total} & \textbf{10,0} \\
+    \hline
+  \end{tabular}
+\end{center}
+
+\vspace{0.5em}
+
+\begin{alertbox}
+  \textbf{Observação:} A dupla deve usar obrigatoriamente os primeiros nomes dos dois integrantes como nomes de domínio. O tutorial entregue deve conter evidências claras (capturas de tela e/ou saídas de terminal) de \textbf{todas} as etapas realizadas. Trabalhos sem evidências de testes não serão pontuados nos critérios 5 e 6.
+\end{alertbox}
+
+\end{document}

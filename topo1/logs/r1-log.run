@@ -3,3 +3,18 @@
 2026-02-05 22:56:49 info cfgInit.doInit:cfgInit.java:1240 applying defaults
 2026-02-05 22:56:49 info cfgInit.doInit:cfgInit.java:1267 applying configuration
 2026-02-05 22:56:49 info cfgInit.doInit:cfgInit.java:1304 boot completed
+2026-02-10 19:40:04 info cfgInit.doInit:cfgInit.java:1204 booting
+2026-02-10 19:40:04 info cfgInit.doInit:cfgInit.java:1234 initializing hardware
+2026-02-10 19:40:04  prtLocTcp.startServer:prtLocTcp.java:84 traceback java.net.BindException: Address already in use at sun.nio.ch.Net.bind0:Net.java:-2/sun.nio.ch.Net.bind:Net.java:577/sun.nio.ch.Net.bind:Net.java:566/sun.nio.ch.NioSocketImpl.bind:NioSocketImpl.java:636/java.net.ServerSocket.bind:ServerSocket.java:391/java.net.ServerSocket.bind:ServerSocket.java:342/prtLocTcp.<init>:prtLocTcp.java:63/prtLocTcp.startServer:prtLocTcp.java:81/cfgInit.executeHWcommands:cfgInit.java:819/cfgInit.doInit:cfgInit.java:1236/cfgInit.doMain:cfgInit.java:1535/router.main:router.java:24/ 
+2026-02-10 19:40:04 info cfgInit.doInit:cfgInit.java:1240 applying defaults
+2026-02-10 19:40:04 info cfgInit.doInit:cfgInit.java:1267 applying configuration
+2026-02-10 19:40:04 info cfgInit.doInit:cfgInit.java:1304 boot completed
+2026-02-10 19:45:42 info cfgInit.doInit:cfgInit.java:1204 booting
+2026-02-10 19:45:42 info cfgInit.doInit:cfgInit.java:1234 initializing hardware
+2026-02-10 19:45:43 info cfgInit.doInit:cfgInit.java:1240 applying defaults
+2026-02-10 19:45:43 info cfgInit.doInit:cfgInit.java:1267 applying configuration
+2026-02-10 19:45:43 info cfgInit.doInit:cfgInit.java:1304 boot completed
+2026-02-10 19:52:01 warning userLine.doCommands:userLine.java:369 <nobody> configuring from local:telnet <loop> 23 -> 127.0.0.1 34518
+2026-02-10 19:52:59 warning userLine.doCommands:userLine.java:418 <nobody> configured from local:telnet <loop> 23 -> 127.0.0.1 34518
+2026-02-10 20:28:28 warning userLine.doCommands:userLine.java:369 <nobody> configuring from local:telnet <loop> 23 -> 127.0.0.1 36128
+2026-02-10 20:28:59 warning userLine.doCommands:userLine.java:418 <nobody> configured from local:telnet <loop> 23 -> 127.0.0.1 36128
