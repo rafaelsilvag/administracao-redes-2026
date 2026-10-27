@@ -15,6 +15,7 @@
     </style>
 </head>
 <body>
+    <p><a href="/">Menu principal</a></p>
     <h1>Cadastro de usuários</h1>
     {% if mensagem %}<p class="mensagem" role="alert">{{ mensagem }}</p>{% endif %}
 
@@ -28,7 +29,7 @@
             <input name="email" type="email" value="{{ usuario.email if usuario else '' }}" required maxlength="254">
         </label>
         <button type="submit">{{ 'Salvar alterações' if usuario else 'Cadastrar' }}</button>
-        <a href="/">Novo cadastro / cancelar</a>
+        <a href="/usuarios">Novo cadastro / cancelar</a>
     </form>
 
     <h2>Usuários cadastrados</h2>

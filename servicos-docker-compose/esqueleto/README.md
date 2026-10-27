@@ -12,7 +12,9 @@ pip install -r requirements.txt
 uvicorn main:app --reload
 ```
 
-Abra <http://127.0.0.1:8000>.
+Abra <http://127.0.0.1:8000> para acessar o menu principal. A opção **Gerenciar usuários** abre o CRUD em `/usuarios`.
+
+As rotas ficam no `main.py` e o HTML nos arquivos `templates/menu.html` e `templates/tela_usuarios.html`. Para incluir outro CRUD no menu, adicione um link `<li><a href="/sua-rota">Gerenciar ...</a></li>` em `templates/menu.html` e implemente as rotas correspondentes no `main.py`.
 
 Veja o [guia completo](../GUIA-INSTALACAO.md) para os comandos de instalação e as explicações. Se copiar somente esta pasta, leve também o guia.
 

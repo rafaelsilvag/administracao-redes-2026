@@ -3,9 +3,9 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, Form, Request
-from fastapi.responses import RedirectResponse
-from fastapi.templating import Jinja2Templates
+from fastapi import FastAPI, Form
+from fastapi.responses import HTMLResponse, RedirectResponse
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 from sqlalchemy import Column, Integer, String, URL, create_engine
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import declarative_base, sessionmaker
@@ -40,16 +40,19 @@ async def iniciar(app: FastAPI):
     yield
     engine.dispose()
 
-app = FastAPI(title="Cadastro de usuários", lifespan=iniciar)
-templates = Jinja2Templates(directory=str(PASTA / "templates"))
+app = FastAPI(title="Gerenciamento", lifespan=iniciar)
+
+# Os arquivos HTML ficam no diretório templates.
+templates = Environment(
+    loader=FileSystemLoader(PASTA / "templates"),
+    autoescape=select_autoescape(["html"]),
+)
 
 # As telas enviam formulários HTML; não é necessário JavaScript nem schemas.
-def mostrar(request, db, usuario=None, mensagem="", status=200):
+def mostrar(db, usuario=None, mensagem="", status=200):
     usuarios = db.query(Usuario).order_by(Usuario.id).all()
-    return templates.TemplateResponse(
-        request=request,
-        name="usuarios.html",
-        context={"usuarios": usuarios, "usuario": usuario, "mensagem": mensagem},
+    return HTMLResponse(
+        templates.get_template("tela_usuarios.html").render(usuarios=usuarios, usuario=usuario, mensagem=mensagem),
         status_code=status,
     )
 
@@ -61,67 +64,71 @@ def validar(nome, email):
         return "Informe um e-mail válido."
     return ""
 
-# 4. Listar usuários e mostrar o formulário de cadastro.
-@app.get("/")
-def inicio(request: Request):
+# 4. Menu principal e acesso ao CRUD de usuários.
+@app.get("/", response_class=HTMLResponse)
+def inicio():
+    return HTMLResponse(templates.get_template("menu.html").render())
+
+@app.get("/usuarios", response_class=HTMLResponse)
+def listar():
     with Sessao() as db:
-        return mostrar(request, db)
+        return mostrar(db)
 
 # 5. Gravar um novo usuário.
 @app.post("/usuarios")
-def cadastrar(request: Request, nome: str = Form(...), email: str = Form(...)):
+def cadastrar(nome: str = Form(...), email: str = Form(...)):
     nome, email = nome.strip(), email.strip()
     with Sessao() as db:
         erro = validar(nome, email)
         if erro:
-            return mostrar(request, db, mensagem=erro, status=422)
+            return mostrar(db, mensagem=erro, status=422)
         db.add(Usuario(nome=nome, email=email))
         try:
             db.commit()
         except IntegrityError:
             db.rollback()
-            return mostrar(request, db, mensagem="E-mail já cadastrado.", status=409)
-    return RedirectResponse(url="/", status_code=303)
+            return mostrar(db, mensagem="E-mail já cadastrado.", status=409)
+    return RedirectResponse(url="/usuarios", status_code=303)
 
 # 6. Visualizar os dados de um usuário e preencher o formulário de edição.
 @app.get("/usuarios/{usuario_id}")
-def visualizar(request: Request, usuario_id: int):
+def visualizar(usuario_id: int):
     with Sessao() as db:
         usuario = db.get(Usuario, usuario_id)
         if usuario is None:
-            return mostrar(request, db, mensagem="Usuário não encontrado.", status=404)
-        return mostrar(request, db, usuario=usuario)
+            return mostrar(db, mensagem="Usuário não encontrado.", status=404)
+        return mostrar(db, usuario=usuario)
 
 # 7. Atualizar os dados de um usuário.
 @app.post("/usuarios/{usuario_id}/editar")
-def editar(request: Request, usuario_id: int, nome: str = Form(...), email: str = Form(...)):
+def editar(usuario_id: int, nome: str = Form(...), email: str = Form(...)):
     nome, email = nome.strip(), email.strip()
     with Sessao() as db:
         usuario = db.get(Usuario, usuario_id)
         if usuario is None:
-            return mostrar(request, db, mensagem="Usuário não encontrado.", status=404)
+            return mostrar(db, mensagem="Usuário não encontrado.", status=404)
         erro = validar(nome, email)
         if erro:
-            return mostrar(request, db, usuario=usuario, mensagem=erro, status=422)
+            return mostrar(db, usuario=usuario, mensagem=erro, status=422)
         usuario.nome = nome
         usuario.email = email
         try:
             db.commit()
         except IntegrityError:
             db.rollback()
-            return mostrar(request, db, usuario=usuario, mensagem="E-mail já cadastrado.", status=409)
-    return RedirectResponse(url="/", status_code=303)
+            return mostrar(db, usuario=usuario, mensagem="E-mail já cadastrado.", status=409)
+    return RedirectResponse(url="/usuarios", status_code=303)
 
 # 8. Excluir um usuário.
 @app.post("/usuarios/{usuario_id}/excluir")
-def excluir(request: Request, usuario_id: int):
+def excluir(usuario_id: int):
     with Sessao() as db:
         usuario = db.get(Usuario, usuario_id)
         if usuario is None:
-            return mostrar(request, db, mensagem="Usuário não encontrado.", status=404)
+            return mostrar(db, mensagem="Usuário não encontrado.", status=404)
         db.delete(usuario)
         db.commit()
-    return RedirectResponse(url="/", status_code=303)
+    return RedirectResponse(url="/usuarios", status_code=303)
 
 if __name__ == "__main__":
     import uvicorn
