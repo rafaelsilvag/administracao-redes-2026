@@ -1,34 +1,31 @@
 # Aplicação de exemplo: FastAPI, HTML e MySQL
 
-Esqueleto inicial para os grupos desenvolverem uma aplicação web com cadastro, listagem, visualização, edição e exclusão de dados.
+Material para adaptar uma aplicação ao projeto integrador ou a uma atividade da disciplina de Engenharia de Software. Consulte o [enunciado da atividade](ATIVIDADE.md).
 
-Consulte o [enunciado da atividade](ATIVIDADE.md).
+## Exemplos
 
-A aplicação reúne em um único arquivo Python a conexão com o MySQL, a classe `Usuario` e as rotas. O HTML é servido pelo próprio FastAPI.
+- [MeuProjeto](MeuProjeto/): exemplo original, com CRUD de usuários em uma lista Python e páginas HTML que acessam a API com `fetch`.
+- [MeuProjeto-Com-BD](MeuProjeto-Com-BD/): mesma estrutura e mesmos nomes de arquivos HTML, acrescentando MySQL, SQLAlchemy e CRUD de usuários em `backend/main.py`.
 
-## Arquivos
+Na versão com banco, **os usuários persistem no MySQL**, com os campos `nome` e `senha` do exemplo original. Os seletores de edição/exclusão e a listagem utilizam o ID gerado pelo banco. O evento do botão de atualizar a lista também foi corrigido. As consultas retornam `id` e `nome`.
 
-- `esqueleto/main.py`: aplicação e CRUD de usuários.
-- `esqueleto/templates/menu.html`: menu principal.
-- `esqueleto/templates/tela_usuarios.html`: formulário e listagem de usuários.
-- `esqueleto/requirements.txt`: bibliotecas necessárias.
-- `esqueleto/banco.sql`: preparação do banco e do usuário MySQL.
-- `esqueleto/.env.example`: exemplo de configuração da conexão.
+## Executar a versão com banco
 
-## Como começar
-
-Siga o [guia de instalação](GUIA-INSTALACAO.md) para preparar Python e MySQL. As instruções resumidas estão no [README do esqueleto](esqueleto/README.md).
-
-Depois de preparar o banco, na pasta `esqueleto`:
+Com Docker e Docker Compose instalados, na raiz deste repositório:
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env
-uvicorn main:app --reload
+cd MeuProjeto-Com-BD
+docker compose up -d --build
 ```
 
-Confira os dados da conexão no `.env` antes de iniciar. Acesse <http://127.0.0.1:8000>.
+- Frontend: <http://127.0.0.1:8001>.
+- Backend e documentação da API: <http://127.0.0.1:8000/docs>.
+- Usuários cadastrados: <http://127.0.0.1:8000/usuarios>.
 
-Cada grupo deverá adaptar o exemplo ao seu tema e implementar as entidades e os relacionamentos solicitados pelo professor.
+O Compose cria o banco `meuprojeto`, configura o usuário didático `aluno`, aguarda o MySQL e inicia o backend. O SQLAlchemy cria a tabela `usuarios` automaticamente. A primeira inicialização pode demorar enquanto as imagens são baixadas e o banco é preparado.
+
+Para encerrar, execute `docker compose down`. Os usuários permanecem no volume nomeado; `docker compose down -v` remove esse volume e seus dados.
+
+As duas versões usam as mesmas portas: encerre uma antes de iniciar a outra. O navegador acessa o backend diretamente na porta `8000`; se usar outra máquina, ajuste o endereço nos `fetch` dos HTML.
+
+Veja no [enunciado](ATIVIDADE.md) o primeiro cadastro de usuários, as orientações para as novas telas e os requisitos de entrega. O antigo [guia de instalação](GUIA-INSTALACAO.md) descreve uma estrutura anterior com templates e não é o roteiro desta versão.

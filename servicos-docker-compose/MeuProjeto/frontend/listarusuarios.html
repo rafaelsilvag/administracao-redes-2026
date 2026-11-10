@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Usuários</title>
+  <style>
+    body {
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 0 16px;
+      font-family: Arial, sans-serif;
+      color: #222;
+    }
+
+    button {
+      margin: 16px 0;
+      padding: 10px 16px;
+      border: 0;
+      border-radius: 6px;
+      background: #2563eb;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:hover { background: #1d4ed8; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+
+    th, td {
+      padding: 12px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+
+    th { background: #f3f4f6; }
+    #mensagem { color: #555; }
+  </style>
+</head>
+<body>
+  <h1>Usuários</h1>
+  <p>Usuários cadastrados no backend.</p>
+
+  <button id="atualizar">Atualizar lista</button>
+  <p id="mensagem" role="status"></p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nome</th>
+        <th>Senha</th>
+      </tr>
+    </thead>
+    <tbody id="lista-usuarios"></tbody>
+  </table>
+
+  <script>
+    const endpoint = "http://127.0.0.1:8000/usuarios";
+    const lista = document.getElementById("lista-usuarios");
+    const mensagem = document.getElementById("mensagem");
+
+    async function carregarUsuarios() {
+      lista.replaceChildren();
+      mensagem.textContent = "Carregando usuários...";
+
+      try {
+        const resposta = await fetch(endpoint);
+
+        if (!resposta.ok) {
+          throw new Error(`Erro HTTP ${resposta.status}`);
+        }
+
+        const usuarios = await resposta.json();
+
+        if (!Array.isArray(usuarios)) {
+          throw new Error("A resposta do backend não é uma lista.");
+        }
+
+        if (usuarios.length === 0) {
+          mensagem.textContent = "Nenhum usuário encontrado.";
+          return;
+        }
+
+        usuarios.forEach((usuario, indice) => {
+          const linha = document.createElement("tr");
+
+          const id = document.createElement("td");
+          id.textContent = usuario.id ?? indice;
+
+          const nome = document.createElement("td");
+          nome.textContent = usuario.nome ?? "Nome não informado";
+
+          const senha = document.createElement("td");
+          senha.textContent = "••••••";
+
+          linha.append(id, nome, senha);
+          lista.appendChild(linha);
+        });
+
+        mensagem.textContent = `${usuarios.length} usuário(s) encontrado(s).`;
+      } catch (erro) {
+        mensagem.textContent =
+          `Não foi possível carregar os usuários: ${erro.message}`;
+      }
+    }
+
+    document
+      .getElementById("atualizar")
+      .addEventListener("cltent = indice;ick", carregarUsuarios);
+
+    carregarUsuarios();
+  </script>
+</body>
+</html>

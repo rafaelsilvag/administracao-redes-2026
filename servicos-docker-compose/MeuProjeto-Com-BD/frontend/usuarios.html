@@ -1,0 +1,39 @@
+<html>
+    <body>
+        <h1>Cadastro de Usuarios</h1>
+        <form id="cadastro">
+            <label> Nome: 
+                <input name="nome" required>
+            </label>
+            <label> Senha: 
+                <input name="senha" required>
+            </label>
+            <button type="submit"> Cadastrar </button>
+        </form>
+        <p id="mensagem" role="status"> </p>
+        <a href="/">Voltar Menu Principal</a>
+        <script>
+            const formulario = document.querySelector("#cadastro")
+            const mensagem = document.querySelector("#mensagem")
+            formulario.addEventListener("submit", async(evento) => {
+                evento.preventDefault();
+                nome = formulario.elements.nome.value
+                senha = formulario.elements.senha.value
+
+                usuario = {
+                    nome: nome,
+                    senha: senha
+                }
+
+                resposta = await fetch("http://127.0.0.1:8000/usuarios", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json"},
+                    body: JSON.stringify(usuario)
+                });
+                
+                dados = await resposta.json();
+                mensagem.textContent = dados.mensagem
+            })
+        </script>
+    </body>
+</html>
