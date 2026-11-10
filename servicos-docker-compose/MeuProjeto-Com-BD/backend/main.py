@@ -1,6 +1,6 @@
 import os
 
-from fastapi import Body, FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from sqlalchemy import Column, Integer, String, create_engine, select
 from sqlalchemy.engine import URL
 from sqlalchemy.orm import declarative_base, sessionmaker
@@ -47,6 +47,8 @@ Base.metadata.create_all(engine)
 
 
 def validar_usuario(dados):
+    if not isinstance(dados, dict):
+        raise HTTPException(status_code=400, detail="Envie um objeto JSON com nome e senha.")
     nome = dados.get("nome")
     senha = dados.get("senha")
     if not isinstance(nome, str) or not nome.strip() or len(nome.strip()) > 100:
@@ -63,7 +65,8 @@ def inicio():
 
 # 3. Receber JSON, criar um objeto e gravar no banco.
 @app.post("/usuarios", status_code=201)
-def cad_usuario(dados: dict = Body(...)):
+async def cad_usuario(request: Request):
+    dados = await request.json()
     nome, senha = validar_usuario(dados)
     with Sessao() as banco:
         usuario = Usuario(nome=nome, senha=senha)
@@ -93,7 +96,8 @@ def visualizar_usuario(usuario_id: int):
 
 # 6. Alterar os campos do objeto e confirmar a alteração.
 @app.put("/usuarios/{usuario_id}")
-def alterar_usuario(usuario_id: int, dados: dict = Body(...)):
+async def alterar_usuario(usuario_id: int, request: Request):
+    dados = await request.json()
     nome, senha = validar_usuario(dados)
     with Sessao() as banco:
         usuario = banco.get(Usuario, usuario_id)

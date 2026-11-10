@@ -125,7 +125,17 @@ with Sessao() as banco:
 - `banco.refresh(...)` carrega os valores gerados pelo banco, como o `id`.
 - O bloco `with` fecha a sessão ao terminar; cada requisição abre sua própria sessão.
 
-A rota usa `dados: dict = Body(...)` para receber JSON em uma função simples, sem criar uma classe de entrada separada. As classes SQLAlchemy representam as tabelas.
+As rotas de cadastro e atualização mantêm `request: Request`, como no exemplo original. A função usa `async def` para ler o JSON com `await request.json()`, sem criar uma classe de entrada separada:
+
+```python
+@app.post("/usuarios", status_code=201)
+async def cad_usuario(request: Request):
+    dados = await request.json()
+    nome, senha = validar_usuario(dados)
+    # Criar o objeto Usuario e gravar com a sessão, conforme main.py.
+```
+
+Na atualização, a assinatura é `async def alterar_usuario(usuario_id: int, request: Request)`, com a mesma leitura do JSON. As classes SQLAlchemy representam as tabelas.
 
 ### 4.2. Compreender a tela de cadastro
 
