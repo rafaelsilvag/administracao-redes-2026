@@ -46,18 +46,6 @@ class Usuario(Base):
 Base.metadata.create_all(engine)
 
 
-def validar_usuario(dados):
-    if not isinstance(dados, dict):
-        raise HTTPException(status_code=400, detail="Envie um objeto JSON com nome e senha.")
-    nome = dados.get("nome")
-    senha = dados.get("senha")
-    if not isinstance(nome, str) or not nome.strip() or len(nome.strip()) > 100:
-        raise HTTPException(status_code=400, detail="Informe um nome com até 100 caracteres.")
-    if not isinstance(senha, str) or not senha.strip() or len(senha.strip()) > 100:
-        raise HTTPException(status_code=400, detail="Informe uma senha com até 100 caracteres.")
-    return nome.strip(), senha.strip()
-
-
 @app.get("/")
 def inicio():
     return {"mensagem": "Bem vindo a FastAPI!"}
@@ -67,7 +55,8 @@ def inicio():
 @app.post("/usuarios", status_code=201)
 async def cad_usuario(request: Request):
     dados = await request.json()
-    nome, senha = validar_usuario(dados)
+    nome = dados.get("nome")
+    senha = dados.get("senha")
     with Sessao() as banco:
         usuario = Usuario(nome=nome, senha=senha)
         banco.add(usuario)
@@ -98,7 +87,8 @@ def visualizar_usuario(usuario_id: int):
 @app.put("/usuarios/{usuario_id}")
 async def alterar_usuario(usuario_id: int, request: Request):
     dados = await request.json()
-    nome, senha = validar_usuario(dados)
+    nome = dados.get("nome")
+    senha = dados.get("senha")
     with Sessao() as banco:
         usuario = banco.get(Usuario, usuario_id)
         if usuario is None:
